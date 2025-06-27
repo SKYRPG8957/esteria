@@ -1,0 +1,52 @@
+{
+  "url": "https://learn.microsoft.com/en-us/minecraft/creator/documents/customcommands",
+  "title": "Scripting Custom Commands (Preview) | Microsoft Learn",
+  "paragraphs": [
+    "Share via",
+    "Note",
+    "Access to this page requires authorization. You can try \nsigning in\n or \nchanging directories\n.",
+    "Access to this page requires authorization. You can try \nchanging directories\n.",
+    "Scripting Custom Commands Overview",
+    "2025-03-26",
+    "In this article",
+    "There is also a video version available of this overview of Scripting Custom Commands:",
+    "Scripting Custom Commands",
+    "Commands are a critical part of nearly any creator project. Commonly, projects are boot-strapped and tested via a set of custom commands and functions, including commands that can reset environments or change configurations. In multiplayer environments, a set of commands can be used to administer games. You can also use commands to provide helpful little builder functions, to further build out your world.",
+    "Starting in Minecraft Bedrock Edition 1.21.80.22 Preview, you can now implement custom commands in script. These commands have the full capability of scripting APIs and custom logic, allowing you to implement sophisticated operations.",
+    "Note that in the current beta, context on the executing environment (e.g., the player who ran the command, or the initiator in NPC environments) is not available; we are looking to bring this execution context in future.",
+    "You can view a sample project at \nhttps://github.com/microsoft/minecraft-scripting-samples\n.",
+    "Using 2.0.0-beta scripting environment",
+    "To get started, we'll want to work with the 2.0.0-beta scripting environment. Custom commands and registration only run in \nthe v2.0.0 scripting environment\n, which itself is currently in beta.",
+    "You'll want to make sure you use \n2.0.0-beta\n as your scripting environment, in the manifest of your behavior pack:",
+    "Registering Commands",
+    "The first step is to register the command. You can do this within the \nstartup\n event of system.beforeEvents, like so:",
+    "There are several parameters you will need to specify:",
+    "Permission Levels",
+    "Commands can have a permission level that is required from executing contexts and players.",
+    "Command Enums",
+    "As of the 1.21.80-preview.27 release you can now register custom enums for script-based commands, like so:",
+    "Execution",
+    "After registering your command, Minecraft will call into your function with the parameters that are specified by the command context.",
+    "If the parameter is optional, then \nundefined\n is passed in if the parameter is not specified.",
+    "Note that script command function runs in a \"before\" context, meaning that most methods that change state are unavailable in the command context. To run commands that change world state, you'll want to consider wrapping them in a function that defers execution until later in the tick, such as \nsystem.run\n for example:",
+    "Summary",
+    "Custom script-based commands unlocks a new organization tool for functionality you have in your creations. Whether a simple internal reset tool or a sophisticated game administration suite, we hope that providing a set of powerful commands is easy and second nature in your projects.",
+    "Feedback",
+    "Was this page helpful?",
+    "Additional resources"
+  ],
+  "code_blocks": [
+    {
+      "text": "  {\n    \"module_name\": \"@minecraft/server\",\n    \"version\": \"2.0.0-beta\"\n  },\n"
+    },
+    {
+      "text": "system.beforeEvents.startup.subscribe((init: StartupEvent) => {\n  const helloCommand: CustomCommand = {\n    name: \"creator:hellocustomcommand\",\n    description: \"Celebration size\",\n    permissionLevel: CustomCommandPermissionLevel.Admin,\n    optionalParameters: [{ type: CustomCommandParamType.Integer, name: \"celebrationSize\" }],\n  };\n  init.customCommandRegistry.registerCommand(helloCommand, helloCustomCommand);\n}\n"
+    },
+    {
+      "text": "system.beforeEvents.startup.subscribe((init: StartupEvent) => {\n  const commandRegistry = event.customCommandRegistry;\n\n  commandRegistry.registerEnum(\"creator:my_enum\", [\"foo\", \"bar\", \"baz\"]);\n\n  const helloCommand: CustomCommand = {\n    name: \"creator:hellocustomcommand\",\n    description: \"Example command\",\n    permissionLevel: CustomCommandPermissionLevel.Any,\n    mandatoryParameters: [\n      { \n        type: CustomCommandParamType.Enum, \n        name: \"creator:my_enum\" // The parameter name must match the registered enum name above\n    }],\n  };\n  commandRegistry.registerCommand(helloCommand, helloCustomCommand);\n}\n"
+    },
+    {
+      "text": "    system.run(() => {\n      for (const player of world.getPlayers()) {\n        player.dimension.createExplosion(player.location, celebrationSize);\n      }\n    });\n"
+    }
+  ]
+}
